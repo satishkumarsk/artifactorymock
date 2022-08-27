@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 	"testing"
 
@@ -157,7 +156,7 @@ func getVersionHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, versionApiResponse)
 }
 
-func defaultHandler(w http.ResponseWriter, r *http.Request) {
+func searchHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -170,36 +169,29 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 func mockServer(t *testing.T) int {
 	handlers := clienttests.HttpServerHandlers{}
 	handlers["/artifactory/api/system/version"] = getVersionHandler
-	handlers["/artifactory/api/search/aql"] = defaultHandler
+	handlers["/artifactory/api/search/aql"] = searchHandler
 	handlers["/"] = http.NotFound
 
 	port, err := clienttests.StartHttpServer(handlers)
 	if err != nil {
-		t.Log(err)
-		os.Exit(1)
+		t.Fatal(err)
 	}
 	return port
 }
 
-func Test_getArtifacts(t *testing.T) {
+func Test_searchArtifacts(t *testing.T) {
 	port := mockServer(t)
-	type args struct {
-		aurl string
-		port string
-	}
 	tests := []struct {
 		name    string
-		args    args
 		wantErr bool
 	}{
-		{"mock test1",
-			args{},
+		{"mock searchApi",
 			false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := getArtifacts("127.0.0.1", strconv.Itoa(port)); (err != nil) != tt.wantErr {
-				t.Errorf("getArtifacts() error = %v, wantErr %v", err, tt.wantErr)
+			if err := searchArtifacts("127.0.0.1", strconv.Itoa(port)); (err != nil) != tt.wantErr {
+				t.Errorf("searchArtifacts() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

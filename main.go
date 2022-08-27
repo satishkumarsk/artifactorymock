@@ -10,11 +10,11 @@ import (
 	"github.com/jfrog/jfrog-client-go/config"
 )
 
-func getArtifacts(aurl string, port string) error {
+func searchArtifacts(aurl string, port string) error {
 	rtDetails := auth.NewArtifactoryDetails()
 	rtDetails.SetUrl(fmt.Sprintf("http://%s:%s/%s/", aurl, port, "artifactory"))
-	rtDetails.SetUser("sathish")
-	rtDetails.SetPassword("sathish")
+	rtDetails.SetUser("")
+	rtDetails.SetPassword("")
 	serviceConfig := config.NewConfigBuilder()
 	serviceConfig.SetServiceDetails(rtDetails)
 	sconf, err := serviceConfig.Build()
@@ -22,6 +22,9 @@ func getArtifacts(aurl string, port string) error {
 		return err
 	}
 	sManager, err := artifactory.New(sconf)
+	if err != nil {
+		return err
+	}
 	params := services.NewSearchParams()
 	params.Pattern = "repo/*/*.zip"
 	// Filter the files by properties.
@@ -47,7 +50,7 @@ func getArtifacts(aurl string, port string) error {
 
 func main() {
 
-	err := getArtifacts("127.0.0.1", "8080")
+	err := searchArtifacts("127.0.0.1", "8080")
 	if err != nil {
 		panic(err)
 	}
